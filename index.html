@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>Ferramenta de Negociação • Projeto Altaris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFAF8;--card:#FFFFFF;--tx:#1C1917;--tx2:#57534E;--bd:#E7E5E4;
+  --gold:#B8860B;--gold2:#DAA520;--goldL:rgba(184,134,11,.08);
+  --ok:#16A34A;--er:#DC2626;--warn:#FEFCE8;--warnB:#FDE047;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --shH:0 2px 8px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.06);
+  --r:14px;--rr:18px;
+}
+[data-t=d]{
+  --bg:#0C0A09;--card:#1C1917;--tx:#FAFAF9;--tx2:#A8A29E;--bd:#292524;
+  --goldL:rgba(218,165,32,.08);--warn:#422006;--warnB:#A16207;
+  --sh:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);
+  --shH:0 2px 8px rgba(0,0,0,.4),0 8px 32px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;transition:background .3s,color .3s}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#1C1917 0%,#292524 50%,#1C1917 100%);
+  padding:clamp(28px,6vw,48px) clamp(16px,4vw,32px);
+  position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(218,165,32,.15) 0%,transparent 60%);pointer-events:none}
+.hero-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(22px,5vw,36px);color:#FAFAF9;line-height:1.15;letter-spacing:-.01em}
+.hero h1 span{color:var(--gold2)}
+.hero-sub{color:#A8A29E;font-size:clamp(12px,3vw,14px);margin-top:6px;font-weight:500}
+.hero-acts{display:flex;gap:10px;align-items:center}
+.btn-theme{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#FAFAF9;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:18px;min-width:48px;min-height:48px;transition:.2s;backdrop-filter:blur(8px)}
+.btn-theme:hover{background:rgba(255,255,255,.14)}
+
+/* ALERT BAR */
+.auth-bar{
+  display:none;background:linear-gradient(90deg,#7F1D1D,#991B1B,#7F1D1D);
+  padding:14px clamp(16px,4vw,32px);text-align:center;
+  animation:pulse-bar 2s ease-in-out infinite;
+}
+.auth-bar.show{display:block}
+@keyframes pulse-bar{0%,100%{opacity:1}50%{opacity:.75}}
+.auth-bar p{color:#FEE2E2;font-weight:700;font-size:clamp(12px,3.2vw,14px);margin-bottom:10px}
+.auth-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.wa-btn{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;
+  font-weight:700;font-size:13px;text-decoration:none;transition:.2s;border:none;cursor:pointer;
+}
+.wa-fin{background:#16A34A;color:#fff}.wa-fin:hover{background:#15803D}
+.wa-ger{background:#FAFAF9;color:#1C1917}.wa-ger:hover{background:#E7E5E4}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:clamp(16px,4vw,28px)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:768px){.grid{grid-template-columns:1fr;gap:14px}.main{padding:14px}}
+
+/* CARDS */
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:var(--rr);
+  padding:clamp(16px,4vw,24px);box-shadow:var(--sh);transition:box-shadow .3s,background .3s;
+}
+.card:hover{box-shadow:var(--shH)}
+.card+.card,.card+.full{margin-top:16px}
+.full{margin-top:16px}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.card-h .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ico-gold{background:var(--goldL);border:1px solid rgba(184,134,11,.15)}
+.card-h h2{font-family:'Playfair Display',serif;font-size:clamp(14px,3.5vw,17px);color:var(--tx);letter-spacing:-.01em}
+
+/* FORM */
+label{display:block;font-size:12px;color:var(--tx2);margin:14px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+label:first-of-type{margin-top:0}
+input[type=number]{
+  width:100%;padding:14px 16px;border:2px solid var(--bd);background:var(--bg);
+  color:var(--tx);border-radius:var(--r);font-size:16px;font-weight:700;
+  font-family:'DM Sans',sans-serif;transition:border-color .2s,box-shadow .2s;
+  -webkit-appearance:none;-moz-appearance:textfield;
+}
+input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.12)}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+input:disabled{opacity:.5;cursor:not-allowed}
+.err{color:var(--er);font-size:12px;margin-top:4px;min-height:16px;font-weight:600}
+.field-label-row{display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px}
+.field-label-row label{margin:0;flex:1}
+.btn-pencil{display:inline-flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--bd);border-radius:7px;color:var(--tx2);font-size:13px;width:28px;height:28px;cursor:pointer;transition:.2s;flex-shrink:0;margin-left:8px;line-height:1}
+.btn-pencil:hover{border-color:var(--gold);color:var(--gold);background:var(--goldL)}
+.edit-alert{display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:8px 12px;margin-top:6px;gap:8px;align-items:flex-start;animation:pulse-alert 1.8s ease-in-out infinite}
+.edit-alert.show{display:flex}
+@keyframes pulse-alert{0%,100%{border-color:#FECACA;background:#FEF2F2}50%{border-color:#F87171;background:#FEE2E2}}
+.edit-alert-text{font-size:11px;font-weight:700;color:#991B1B;line-height:1.5}
+[data-t=d] .edit-alert{background:#3B0F0F;border-color:#7F1D1D}
+[data-t=d] .edit-alert-text{color:#FCA5A5}
+.faixa-tag{background:var(--goldL);border:1px dashed var(--gold);padding:12px;border-radius:var(--r);margin-top:14px;font-weight:700;font-size:13px;color:var(--gold);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.faixa-tag span{flex:1}
+
+/* STATS */
+.stat{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--bd);gap:10px}
+.stat:last-child{border:none}
+.stat-label{font-size:14px;color:var(--tx2)}
+.stat-val{font-family:'Playfair Display',serif;color:var(--gold);font-size:clamp(15px,4vw,18px);text-align:right}
+
+/* TABLE */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:12px;border-radius:var(--r);border:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:480px}
+th{padding:12px 10px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);font-weight:700;background:var(--goldL);border-bottom:2px solid var(--bd);position:sticky;top:0}
+td{padding:12px 10px;text-align:center;border-bottom:1px solid var(--bd);transition:background .15s}
+tr.good:hover td{background:var(--goldL)}
+tr.good td:first-child{font-weight:800;color:var(--gold)}
+tr.bad{opacity:.25}tr.bad td{text-decoration:line-through}
+
+/* POLICY */
+.pol-section{margin-bottom:20px}
+.pol-section:last-child{margin-bottom:0}
+.pol-title{
+  font-family:'Playfair Display',serif;font-size:clamp(14px,3.5vw,16px);
+  color:var(--gold);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--bd);
+}
+.pol-text{font-size:13px;color:var(--tx2);line-height:1.8}
+.pol-text p{padding:3px 0}
+.pol-text b,.pol-text strong{color:var(--tx);font-weight:600}
+.pol-text .hl{color:var(--gold);font-weight:700}
+.pol-text .sub-item{padding-left:16px;border-left:2px solid var(--goldL)}
+.pol-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.pol-nav button{
+  padding:8px 14px;border-radius:8px;border:1px solid var(--bd);background:var(--card);
+  color:var(--tx2);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;
+  font-family:'DM Sans',sans-serif;
+}
+.pol-nav button:hover,.pol-nav button.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* FOOTER */
+.ft{text-align:center;padding:28px 16px 20px;color:var(--tx2);font-size:12px}
+.ft b{color:var(--gold)}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border-radius:var(--rr);padding:clamp(20px,5vw,32px);max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:6px}
+.modal p{color:var(--tx2);font-size:13px;margin-bottom:16px}
+.modal input{margin-bottom:12px}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{
+  flex:1;padding:12px;border-radius:var(--r);font-weight:700;font-size:14px;
+  cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:.2s;
+}
+.m-ok{background:var(--gold);color:#fff}.m-ok:hover{background:var(--gold2)}
+.m-cancel{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}.m-cancel:hover{background:var(--bd)}
+.m-err{color:var(--er);font-size:12px;min-height:16px;margin-bottom:8px;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1>💎 Ferramenta de <span>Negociação</span></h1>
+      <div class="hero-sub">Projeto Altaris • Uso Interno Autorizado</div>
+    </div>
+    <div class="hero-acts">
+      <button class="btn-theme" onclick="toggleTheme()" title="Alternar tema">🌓</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH BAR -->
+<div class="auth-bar" id="authBar">
+  <p>⚠️ MODO EDIÇÃO ATIVO — Somente com autorização da gerência</p>
+  <div class="auth-btns">
+    <a class="wa-btn wa-fin" href="https://wa.me/5589994444950?text=Solicito%20autoriza%C3%A7%C3%A3o%20para%20edi%C3%A7%C3%A3o%20na%20Ferramenta%20de%20Negocia%C3%A7%C3%A3o%20Altaris." target="_blank" rel="noopener">📱 Financeiro — (89) 99444-4950</a>
+    <a class="wa-btn wa-ger" href="https://wa.me/5589981020841?text=Solicito%20autoriza%C3%A7%C3%A3o%20para%20edi%C3%A7%C3%A3o%20na%20Ferramenta%20de%20Negocia%C3%A7%C3%A3o%20Altaris." target="_blank" rel="noopener">📱 Gerente Geral — (89) 98102-0841</a>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="modal-bg" id="pinModal">
+  <div class="modal">
+    <h3>🔒 Acesso Restrito</h3>
+    <p>Digite a senha de autorização da gerência para habilitar a edição dos campos.</p>
+    <input type="password" id="pinInput" inputmode="numeric" placeholder="Senha de acesso" maxlength="10" onkeydown="if(event.key==='Enter')checkPin()">
+    <div class="m-err" id="pinErr"></div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closePin()">Cancelar</button>
+      <button class="m-ok" onclick="checkPin()">Desbloquear</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="grid">
+    <!-- INPUT CARD -->
+    <div class="card">
+      <div class="card-h"><div class="ico ico-gold">📝</div><h2>Dados da Negociação</h2></div>
+
+      <!-- VALOR TOTAL — livre -->
+      <label>Valor Total do Tratamento (R$)</label>
+      <input id="vt" type="number" inputmode="decimal" min="0" step="50" oninput="calc()" placeholder="Ex: 5000">
+      <div class="err" id="e1"></div>
+
+      <!-- % ENTRADA — livre -->
+      <label>% de Entrada</label>
+      <input id="pe" type="number" inputmode="decimal" min="0" max="100" value="30" oninput="calc()">
+      <div class="err" id="e2"></div>
+
+      <!-- PARCELAMENTO MÁXIMO OVERRIDE — com senha -->
+      <div class="field-label-row">
+        <label>Override Parcelamento Máximo (nº de vezes)</label>
+        <button class="btn-pencil" onclick="requestFieldEdit('pmOverride','pmAlert')" title="Alterar regra — requer autorização">✏️</button>
+      </div>
+      <input id="pmOverride" type="number" inputmode="numeric" min="1" max="60" placeholder="Automático pela faixa de valor" oninput="calc()" disabled>
+      <div class="edit-alert" id="pmAlert"><span class="edit-alert-text">⚠️ REGRA ALTERADA — Você está sobrescrevendo o limite máximo de parcelamento da faixa automática. Esta exceção exige autorização da gerência. Solicite via WhatsApp abaixo.</span></div>
+      <div class="err" id="e_pm"></div>
+
+      <!-- TAXA DE JUROS — com senha -->
+      <div class="field-label-row">
+        <label>Taxa de Juros Mensal (%) — opcional</label>
+        <button class="btn-pencil" onclick="requestFieldEdit('jm','jmAlert')" title="Alterar regra — requer autorização">✏️</button>
+      </div>
+      <input id="jm" type="number" inputmode="decimal" min="0" step="0.1" value="0" oninput="calc()" disabled>
+      <div class="edit-alert" id="jmAlert"><span class="edit-alert-text">⚠️ JUROS ALTERADO — Taxa de juros modificada. Deve estar alinhada com a política vigente e autorizada pela gerência.</span></div>
+      <div class="err" id="e3"></div>
+
+      <!-- FAIXA TAG -->
+      <div class="faixa-tag">
+        <span id="faixaTag">Informe o valor total para simular</span>
+      </div>
+    </div>
+
+    <!-- SUMMARY CARD -->
+    <div class="card">
+      <div class="card-h"><div class="ico ico-gold">💰</div><h2>Resumo da Proposta</h2></div>
+      <div class="stat"><span class="stat-label">Valor Total</span><span class="stat-val" id="rT">R$ 0,00</span></div>
+      <div class="stat"><span class="stat-label">Entrada</span><span class="stat-val" id="rE">R$ 0,00</span></div>
+      <div class="stat"><span class="stat-label">Restante a Parcelar</span><span class="stat-val" id="rR">R$ 0,00</span></div>
+      <div class="stat"><span class="stat-label">Parcelamento Máx.</span><span class="stat-val" id="rM">—</span></div>
+      <div class="stat"><span class="stat-label">Desconto à Vista (15%)</span><span class="stat-val" id="rD">—</span></div>
+      <div class="stat"><span class="stat-label">Desconto 5x (10%)</span><span class="stat-val" id="rD5">—</span></div>
+      <div class="stat"><span class="stat-label">Desconto 10x (5%)</span><span class="stat-val" id="rD10">—</span></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card full">
+    <div class="card-h"><div class="ico ico-gold">📊</div><h2>Opções de Parcelamento</h2></div>
+    <div class="tw"><table>
+      <thead><tr><th>Vezes</th><th>Parcela</th><th>Total c/ Juros</th><th>Juros</th><th>Status</th></tr></thead>
+      <tbody id="tb"></tbody>
+    </table></div>
+  </div>
+
+  <!-- CRC QUICK POLICY -->
+  <div class="card full" style="border:2px solid var(--gold);background:var(--goldL)">
+    <div class="card-h"><div class="ico ico-gold">⚡</div><h2 style="color:var(--gold)">Política de Negociação — CRC Comercial</h2></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--gold);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)">Será considerado venda se a <strong>entrada foi efetivada</strong></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--gold);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)"><strong>Documentação em ordem:</strong> contrato, nota promissória, termo de consentimento, termo de emissão de boletos</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--gold);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)">Venda com boletos somente se o <strong>CPF estiver aprovado</strong></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--gold);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)">Respeitar <strong>taxa de juros fixada</strong>, mínimo de entrada e máximo de parcelamento determinado pelo Gerente</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--ok);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)">Pagamento <strong>à vista</strong> → desconto até <strong style="color:var(--ok);font-size:16px">15%</strong></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--ok);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">6</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)">Pagamento em <strong>5x</strong> → desconto até <strong style="color:var(--ok);font-size:16px">10%</strong></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;background:var(--card);border-radius:10px;padding:14px;border:1px solid var(--bd)">
+        <span style="background:var(--ok);color:#fff;font-weight:800;font-size:13px;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0">7</span>
+        <span style="font-size:13px;line-height:1.6;color:var(--tx)">Pagamento em <strong>10x</strong> → desconto até <strong style="color:var(--ok);font-size:16px">5%</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POLICY COMPLETA -->
+  <div class="card full">
+    <div class="card-h"><div class="ico ico-gold">📋</div><h2>Política Comercial Completa</h2></div>
+    <div class="pol-nav" id="polNav"></div>
+    <div id="polContent"></div>
+  </div>
+
+  <div class="ft">💎 <b>Projeto Altaris</b> • Todos os direitos reservados<br>Uso exclusivo interno — Araruna Odontologia</div>
+</div>
+
+<script>
+/* === UTILS === */
+const $=id=>document.getElementById(id);
+const F=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n||0);
+
+/* === EDIT MODE === */
+let editMode=false;
+let pendingFieldId=null,pendingAlertId=null;
+
+function requestFieldEdit(fieldId,alertId,msg){
+  if(!editMode){
+    pendingFieldId=fieldId; pendingAlertId=alertId;
+    $('pinModal').classList.add('show');
+    $('pinInput').value=''; $('pinErr').textContent='';
+    setTimeout(()=>$('pinInput').focus(),200);
+  } else {
+    enableField(fieldId,alertId);
+  }
+}
+function enableField(fid,aid){
+  const el=$(fid); if(el) el.disabled=false;
+  const al=$(aid); if(al){ al.classList.add('show'); $('authBar').classList.add('show'); }
+  if(el) el.focus();
+}
+function checkPin(){
+  const pin=$('pinInput').value.trim();
+  if(pin==='249224'){
+    editMode=true;
+    $('pinModal').classList.remove('show');
+    if(pendingFieldId){ enableField(pendingFieldId,pendingAlertId); pendingFieldId=null; pendingAlertId=null; }
+    calc();
+  } else {
+    $('pinErr').textContent='Senha incorreta. Solicite autorização ao gerente.';
+    $('pinInput').value=''; $('pinInput').focus();
+  }
+}
+function closePin(){$('pinModal').classList.remove('show'); pendingFieldId=null; pendingAlertId=null;}
+
+/* === THEME === */
+function toggleTheme(){
+  const t=document.documentElement.dataset.t==='d'?'l':'d';
+  document.documentElement.dataset.t=t;
+  try{localStorage.altarisTheme=t}catch(e){}
+}
+try{document.documentElement.dataset.t=localStorage.altarisTheme||'l'}catch(e){}
+
+/* === FAIXA === */
+function getFaixa(v){
+  if(v<1000)return{t:'Sem parcelamento',n:0};
+  if(v<3000)return{t:'Até 4x (R$1.000–R$2.999)',n:4};
+  if(v<5000)return{t:'Até 8x (R$3.000–R$4.999)',n:8};
+  if(v<8000)return{t:'Até 12x (R$5.000–R$7.999)',n:12};
+  if(v<12000)return{t:'Até 20x (R$8.000–R$11.999)',n:20};
+  return{t:'24x ou mais (acima R$12.000)',n:36};
+}
+
+/* === CALC === */
+function calc(){
+  const vt=parseFloat($('vt').value)||0;
+  let pe=parseFloat($('pe').value);
+  let jm=parseFloat($('jm').value)||0;
+  const pmOvEl=$('pmOverride');
+  const pmOvRaw=pmOvEl?parseFloat(pmOvEl.value):NaN;
+  const e1=$('e1'),e2=$('e2'),e3=$('e3');
+
+  if(vt<0){e1.textContent='Valor não pode ser negativo'}
+  else if(vt>0&&vt<100){e1.textContent='Valor muito baixo'}
+  else{e1.textContent=''}
+
+  if(isNaN(pe)||pe<0){pe=0;e2.textContent='% inválida'}
+  else if(pe>100){pe=100;$('pe').value=100;e2.textContent='Máximo 100%'}
+  else{e2.textContent=''}
+
+  if(jm<0){jm=0;e3.textContent='Juros não pode ser negativo'}
+  else{e3.textContent=''}
+
+  const j=jm/100;
+  const ent=vt*(pe/100);
+  const rest=vt-ent;
+  const f=getFaixa(vt);
+
+  let maxN=f.n;
+  let faixaLabel=f.t;
+  if(!isNaN(pmOvRaw)&&pmOvRaw>=1){
+    maxN=Math.round(pmOvRaw);
+    faixaLabel=f.t+' ⚠️ Override: '+maxN+'x';
+  }
+
+  $('rT').textContent=F(vt);
+  $('rE').textContent=F(ent);
+  $('rR').textContent=F(rest);
+  $('rM').textContent=faixaLabel;
+  $('rD').textContent=vt>0?F(vt*0.15):'—';
+  $('rD5').textContent=vt>0?F(vt*0.10):'—';
+  $('rD10').textContent=vt>0?F(vt*0.05):'—';
+  $('faixaTag').textContent=vt>0?'Faixa: '+faixaLabel:'Informe o valor total para simular';
+
+  const tb=$('tb');
+  if(vt<=0||rest<=0){
+    tb.innerHTML='<tr><td colspan="5" style="color:var(--tx2);padding:28px;font-style:italic">Informe o valor total para ver as opções de parcelamento</td></tr>';
+    return;
+  }
+  let html='';
+  const tblMax=Math.max(24,maxN);
+  for(let i=1;i<=tblMax;i++){
+    let tot,par;
+    if(j>0){const pj=j*Math.pow(1+j,i)/(Math.pow(1+j,i)-1);par=rest*pj;tot=par*i;}
+    else{par=rest/i;tot=rest;}
+    const jrs=tot-rest;
+    const ok=i<=maxN;
+    const isOverrideRow=!isNaN(pmOvRaw)&&pmOvRaw>=1&&i<=maxN&&i>f.n;
+    const badge=isOverrideRow?' <span style="background:#DC2626;color:#fff;font-size:9px;padding:1px 5px;border-radius:4px;vertical-align:middle">AUTH</span>':'';
+    html+='<tr class="'+(ok?'good':'bad')+'"><td><b>'+i+'x</b>'+badge+'</td><td>'+F(par)+'</td><td>'+F(tot)+'</td><td>'+F(jrs)+'</td><td>'+(ok?'✅':'❌')+'</td></tr>';
+  }
+  tb.innerHTML=html;
+}
+
+/* === POLICY DATA === */
+const sections=[
+{id:'obj',title:'1. Objetivo',content:`
+<p>Estabelecer diretrizes claras sobre os critérios de negociação, formas de pagamento, prazos, direitos e deveres dos pacientes, colaboradores e parceiros, assegurando a transparência, ética e conformidade legal nas operações comerciais.</p>`},
+{id:'preco',title:'2. Composição de Preço',content:`
+<p><strong>2.1 Custos Fixos:</strong> Aluguel, salários, energia básica, taxas e seguros.</p>
+<p><strong>2.2 Custos Variáveis:</strong> Materiais odontológicos, insumos, energia adicional, comissões e impostos por serviço prestado.</p>
+<p><strong>2.3 Margem de Contribuição:</strong> Responsável pela sustentabilidade da operação e reinvestimento em tecnologia, qualidade e estrutura.</p>`},
+{id:'tabela',title:'3. Tabelas de Negociação',content:`
+<p><strong>3.1 Tabela de Descontos:</strong> Aplicável de acordo com as etapas de negociação e margem mínima autorizada.</p>
+<p class="sub-item">Step 1 – Entrada mínima de <span class="hl">35%</span></p>
+<p class="sub-item">Step 2 – Entrada mínima de <span class="hl">20%</span></p>
+<p class="sub-item">Step 3 a 5 (Follow-up) – Entrada mínima de <span class="hl">15%</span></p>
+<p><strong>3.2 Condições Especiais no Cartão:</strong></p>
+<p class="sub-item">Entrada: <span class="hl">20%</span></p>
+<p class="sub-item">Desconto de <span class="hl">4%</span></p>
+<p class="sub-item">Parcelamento em até <span class="hl">12x sem juros</span></p>`},
+{id:'pgto',title:'4. Formas de Pagamento',content:`
+<p><strong>À Vista:</strong> Dinheiro, PIX, débito, boleto quitado no mês vigente.</p>
+<p><strong>Parcelado:</strong> Cartão de crédito ou boleto conforme critérios de crédito.</p>`},
+{id:'neg',title:'5. Política de Negociação',content:`
+<p><strong>5.1 Condições para Liberação de Boleto:</strong></p>
+<p class="sub-item">Entrada mínima de <span class="hl">30%</span> para iniciar tratamento de imediato</p>
+<p class="sub-item">Consulta ao Serasa obrigatória</p>
+<p class="sub-item">Verificação de histórico de inadimplência</p>
+<p class="sub-item">Tentativa prévia de todas as formas à vista (débito, crédito, financeiras)</p>
+<p><strong>5.2 Parcelamento por Faixa de Valor:</strong></p>
+<p class="sub-item">R$ 1.000 a R$ 2.999 → até <span class="hl">4x</span></p>
+<p class="sub-item">R$ 3.000 a R$ 4.999 → até <span class="hl">8x</span></p>
+<p class="sub-item">R$ 5.000 a R$ 7.999 → até <span class="hl">12x</span></p>
+<p class="sub-item">R$ 8.000 a R$ 11.999 → até <span class="hl">20x</span></p>
+<p class="sub-item">Acima de R$ 12.000 → <span class="hl">24x ou mais</span></p>
+<p><strong>5.3 A CRC Comercial deve seguir a seguinte política de negociação:</strong></p>
+<p class="sub-item"><b>1.</b> Será considerado venda se a entrada foi efetivada</p>
+<p class="sub-item"><b>2.</b> Será considerado venda se documentação estiver em ordem (contrato, nota promissória, termo de consentimento, termo de emissão de boletos)</p>
+<p class="sub-item"><b>3.</b> Será considerado venda com boletos se o CPF estiver aprovado</p>
+<p class="sub-item"><b>4.</b> Será considerado venda se respeitar: taxa de juros fixada, mínimo de entrada e máximo de parcelamento determinado pelo Gerente</p>
+<p><strong>5.3 A CRC Comercial deve seguir a seguinte política de negociação:</strong></p>
+<p class="sub-item"><b>1.</b> Será considerado venda se a entrada foi efetivada</p>
+<p class="sub-item"><b>2.</b> Será considerado venda se documentação estiver em ordem (contrato, nota promissória, termo de consentimento, termo de emissão de boletos)</p>
+<p class="sub-item"><b>3.</b> Será considerado venda com boletos se o CPF estiver aprovado</p>
+<p class="sub-item"><b>4.</b> Será considerado venda se respeitar: taxa de juros fixada, mínimo de entrada e máximo de parcelamento determinado pelo Gerente</p>
+<p class="sub-item"><b>5.</b> Para pagamento à vista conceder até <span class="hl">15%</span></p>
+<p class="sub-item"><b>6.</b> Para pagamento em 5x conceder até <span class="hl">10%</span></p>
+<p class="sub-item"><b>7.</b> Para pagamento em 10x conceder até <span class="hl">5%</span></p>
+<p class="sub-item">Parcelamentos acima de 24x somente com autorização do gerente</p>`},
+{id:'inad',title:'6. Inadimplência',content:`
+<p>Monitoramento via Clinicorp.</p>
+<p>Se a taxa ultrapassar <span class="hl">9%</span>, reduzir vendas via boleto.</p>
+<p>Apenas o gerente pode liberar pacientes inadimplentes.</p>`},
+{id:'serasa',title:'7. Serasa',content:`
+<p><strong>Inclusão:</strong> Após 60 dias de inadimplência e tentativas frustradas.</p>
+<p><strong>Retirada:</strong> Após quitação ou renegociação cumprida e assinada.</p>`},
+{id:'cancel',title:'8. Cancelamento e Desistência',content:`
+<p><strong>8.1 Direito de Arrependimento:</strong> Prazo de 7 dias após assinatura, desde que nenhum atendimento ou exame tenha sido iniciado. Devolução integral, sem taxas. (Negócios fechados de forma online).</p>
+<p><strong>8.2 Cancelamento Após Início:</strong> Cobrança proporcional aos serviços realizados, materiais utilizados e horas clínicas. Saldo pode ser devolvido ou convertido em crédito. Sem justificativa aceita, será cobrada multa de <span class="hl">10%</span> prevista no CTB.</p>
+<p><strong>8.3 Procedimento:</strong> Solicitação por escrito. Análise em até 7 dias úteis. Cancelamento realizado pela CRC Comercial.</p>
+<p><strong>8.4 Mudança de Datas dos Boletos:</strong></p>
+<p class="sub-item">Solicitação com antecedência mínima de 7 dias úteis</p>
+<p class="sub-item">Vencimentos permitidos: <span class="hl">07, 11 ou 21</span></p>
+<p class="sub-item">Uma alteração por boleto</p>
+<p class="sub-item">Boletos vencidos não podem ser alterados</p>
+<p class="sub-item">A segunda mudança para o mesmo boleto é considerada inadimplência</p>
+<p class="sub-item">A alteração não muda o valor da parcela</p>
+<p class="sub-item">Casos frequentes serão avaliados pela gerência</p>
+<p><strong>Alteração de todos os boletos futuros:</strong></p>
+<p class="sub-item">Permitida apenas uma vez durante o tratamento</p>
+<p class="sub-item">Formalização obrigatória por escrito</p>
+<p class="sub-item">Válida a partir do boleto ainda não vencido (mínimo 7 dias)</p>
+<p class="sub-item">Taxa administrativa de <span class="hl">R$ 25,00</span> pode ser cobrada</p>
+<p class="sub-item">Essa solicitação é uma exceção para manter o tratamento em dia</p>`},
+{id:'devol',title:'9. Política de Devolução',content:`
+<p>Aplicável em falhas da clínica.</p>
+<p>Análise: 7 dias úteis.</p>
+<p>Devolução: até 30 dias úteis após aprovação.</p>
+<p>Responsável: Departamento financeiro.</p>`},
+{id:'troca',title:'10. Troca de Tratamento',content:`
+<p><strong>Mais barato:</strong> crédito ou reembolso proporcional.</p>
+<p><strong>Mais caro:</strong> novo contrato, possível entrada adicional.</p>`},
+{id:'docs',title:'11. Documentos Necessários',content:`
+<p>CPF do titular.</p>
+<p>Comprovante de residência atualizado.</p>
+<p>Termos assinados conforme o procedimento.</p>`},
+{id:'equipe',title:'12. Equipe de Vendas',content:`
+<p><strong>Dentista Avaliador:</strong> Orçamento, Planejamento e Vídeo institucional.</p>
+<p><strong>CRC Comercial:</strong> Follow-up e fechamento.</p>
+<p><strong>Financeiro:</strong> Finalização com entrada paga.</p>
+<p><strong>CRC Pós-venda:</strong> Fidelização, campanhas, aniversariantes.</p>
+<p><strong>Gerente:</strong> Estratégias e exceções.</p>`},
+{id:'pag',title:'13–14. Comissão e Pagamentos',content:`
+<p><strong>13. Comissionamento</strong></p>
+<div style="overflow-x:auto;margin:10px 0">
+<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:360px">
+<thead>
+<tr style="background:var(--goldL)">
+  <th style="padding:10px;text-align:left;border:1px solid var(--bd);color:var(--tx2);font-size:11px;text-transform:uppercase">Profissional</th>
+  <th style="padding:10px;text-align:center;border:1px solid var(--bd);color:var(--tx2);font-size:11px;text-transform:uppercase">Entrada 10–19,99%</th>
+  <th style="padding:10px;text-align:center;border:1px solid var(--bd);color:var(--tx2);font-size:11px;text-transform:uppercase">Entrada 20–29,99%</th>
+  <th style="padding:10px;text-align:center;border:1px solid var(--bd);color:var(--tx2);font-size:11px;text-transform:uppercase">Entrada ≥30%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="padding:10px;border:1px solid var(--bd);font-weight:600;color:var(--tx)">CRC Comercial</td>
+  <td style="padding:10px;border:1px solid var(--bd);text-align:center;color:var(--tx)"><span class="hl">0,5%</span></td>
+  <td style="padding:10px;border:1px solid var(--bd);text-align:center;color:var(--tx)"><span class="hl">0,8%</span></td>
+  <td style="padding:10px;border:1px solid var(--bd);text-align:center;color:var(--tx)"><span class="hl">1,0%</span></td>
+</tr>
+<tr style="background:var(--goldL)">
+  <td style="padding:10px;border:1px solid var(--bd);font-weight:600;color:var(--tx)">Dentista Avaliador</td>
+  <td style="padding:10px;border:1px solid var(--bd);text-align:center;color:var(--tx)"><span class="hl">2%</span></td>
+  <td style="padding:10px;border:1px solid var(--bd);text-align:center;color:var(--tx)"><span class="hl">3%</span></td>
+  <td style="padding:10px;border:1px solid var(--bd);text-align:center;color:var(--tx)"><span class="hl">4%</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="margin-top:14px"><strong>14. Pagamentos de Profissionais</strong></p>
+<p>Pagamento combinado + comissão até dia <span class="hl">20</span> do mês subsequente.</p>
+<p><strong>Impedimentos:</strong> contrato ausente, inadimplência, pendência clínica.</p>`},
+{id:'gar',title:'15. Garantia',content:`
+<p>Prótese: até <span class="hl">1 ano</span>.</p>
+<p>Implantes: até <span class="hl">2 anos</span> (com manutenção).</p>
+<p>Clareamento: até <span class="hl">6 meses</span>.</p>
+<p>Perde a garantia quem faltar à revisão ou descumprir orientações.</p>`},
+{id:'alta',title:'16–17. Alta e Abandono',content:`
+<p><strong>Consulta de Alta:</strong> Emitida após avaliação e assinatura do termo de conclusão pelo dentista responsável.</p>
+<p><strong>Abandono:</strong> Ausência por mais de 60 dias sem justificativa. Retorno exige nova avaliação e possível taxa.</p>`},
+{id:'canais',title:'18. Canais de Atendimento',content:`
+<p><strong>CRC Comercial:</strong> (89) 99409-3474</p>
+<p><strong>Financeiro:</strong> (89) 99444-4950</p>
+<p><strong>Ouvidoria Geral:</strong> odontoprimuspicos@gmail.com</p>
+<p><strong>Ouvidoria Financeiro:</strong> (89) 99444-4950</p>`},
+{id:'final',title:'19. Disposições Finais',content:`
+<p>Esta política pode ser revista a qualquer momento. Toda exceção precisa de autorização formal da gerência.</p>`},
+{id:'proto',title:'20. Protocolo Comercial',content:`
+<p><strong>📍 Avaliadores — Dentro da Sala</strong></p>
+<p class="sub-item">1️⃣ <strong>Parcelamento:</strong> Até 18x no boleto.</p>
+<p class="sub-item">2️⃣ <strong>Orçamento Completo:</strong> Inclua todos os procedimentos (extrações, clareamentos, etc.), mesmo que sem custo, para evitar dúvidas futuras.</p>
+<p class="sub-item">3️⃣ <strong>Entrada Inicial:</strong></p>
+<p class="sub-item" style="padding-left:32px">— Solicitar 35% do valor e negociar até mínimo de 20%.</p>
+<p class="sub-item" style="padding-left:32px">— Pagamento via PIX ou débito.</p>
+<p class="sub-item" style="padding-left:32px">— Se parcelado em 10x no cartão, a antecipação será considerada com 30% de entrada.</p>
+<p class="sub-item" style="padding-left:32px">— Para pagamento à vista, oferecer 10% de desconto na entrada.</p>
+<p class="sub-item">4️⃣ Sem cartão? Oferecer entrada programada em até <span class="hl">3x</span> (sem descontos).</p>
+<p class="sub-item">5️⃣ Desconto máximo: Até <span class="hl">7%</span> no valor total para fechamento imediato.</p>
+<p class="sub-item">6️⃣ Pagamento à vista no Fechamento: Desconto real por procedimento + <span class="hl">10%</span> no total.</p>
+<p class="sub-item">7️⃣ Sem Entrada Disponível? Oferecer financiamento via <strong>Empy</strong>.</p>
+
+<p style="margin-top:14px"><strong>📍 CRC Comercial</strong></p>
+<p class="sub-item">1️⃣ Possibilidade de parcelamento em até <span class="hl">24x</span>.</p>
+<p class="sub-item">2️⃣ Para pagamento à vista, oferecer até <span class="hl">15%</span> de desconto, considerando possíveis descontos já aplicados pelo avaliador.</p>
+<p class="sub-item">3️⃣ Margem para negociação no follow-up (ofertar descontos intercalados conforme necessidade).</p>
+<p class="sub-item">4️⃣ Saiu da sala sem fechar?</p>
+<p class="sub-item" style="padding-left:32px">— Perde o desconto imediato.</p>
+<p class="sub-item" style="padding-left:32px">— Pode marcar uma data para retorno e nova negociação.</p>
+
+<p style="margin-top:14px"><strong>📌 Observações Importantes</strong></p>
+<p class="sub-item">✅ <strong>Consulta de CPF:</strong> Todos os pacientes devem ter o CPF consultado antes da aprovação da financeira.</p>
+<p class="sub-item">✅ <strong>Entrada Mínima:</strong> Nenhum fechamento pode ser realizado sem pelo menos <span class="hl">10%</span> de entrada.</p>
+<p class="sub-item">✅ <strong>Validação do Fechamento:</strong></p>
+<p class="sub-item" style="padding-left:32px">— A entrada deve ser paga via débito ou PIX dentro do mês corrente para que o fechamento seja contabilizado no mesmo período.</p>
+<p class="sub-item" style="padding-left:32px">— Caso contrário, será considerado venda para o mês seguinte.</p>
+<p class="sub-item">✅ <strong>Boletos:</strong></p>
+<p class="sub-item" style="padding-left:32px">— Pacientes que pagarem via boleto devem ter o CPF consultado na plataforma antes da emissão dos boletos.</p>
+<p class="sub-item" style="padding-left:32px">— Datas fixas de vencimento dos boletos: <span class="hl">07, 11 e 21</span> de cada mês.</p>
+<p class="sub-item">✅ <strong>Entrada Programada:</strong></p>
+<p class="sub-item" style="padding-left:32px">— Caso o paciente não tenha o valor total da entrada, ofereça a opção de entrada programada.</p>
+<p class="sub-item" style="padding-left:32px">— O paciente deve ser informado de que o início do tratamento só ocorrerá após a conclusão do pagamento da entrada.</p>
+<p style="margin-top:12px">Este protocolo garante transparência, organização e uma negociação eficiente para o fechamento de tratamentos. 🚀</p>`}
+];
+
+/* === RENDER POLICY === */
+let activeSection='obj';
+function renderPolicy(){
+  const nav=$('polNav');
+  const content=$('polContent');
+  nav.innerHTML=sections.map(s=>`<button onclick="showSection('${s.id}')" class="${s.id===activeSection?'active':''}" id="nav_${s.id}">${s.title}</button>`).join('');
+  content.innerHTML=sections.map(s=>`<div class="pol-section" id="sec_${s.id}" style="display:${s.id===activeSection?'block':'none'}"><div class="pol-title">${s.title}</div><div class="pol-text">${s.content}</div></div>`).join('');
+}
+function showSection(id){
+  activeSection=id;
+  sections.forEach(s=>{
+    const el=document.getElementById('sec_'+s.id);
+    const btn=document.getElementById('nav_'+s.id);
+    if(el)el.style.display=s.id===id?'block':'none';
+    if(btn)btn.classList.toggle('active',s.id===id);
+  });
+}
+renderPolicy();
+
+/* === CLOSE MODAL ON BG CLICK === */
+$('pinModal').addEventListener('click',e=>{if(e.target===$('pinModal'))closePin()});
+
+/* === INIT === */
+calc();
+</script>
+</body>
+</html>
